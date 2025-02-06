@@ -56,11 +56,16 @@ return {
           name = "Launch file",
           program = "${file}",
           pythonPath = function()
-            return project_config.PYTHON_VENV or vim.fn.exepath("python")
+            -- Используем абсолютный путь, если PYTHON_VENV не абсолютный
+            local python_path = project_config.PYTHON_VENV or vim.fn.exepath("python")
+            if not python_path:match("^/") then
+              python_path = vim.fn.expand(vim.fn.getcwd() .. "/" .. python_path)
+            end
+            return python_path
           end,
           cwd = project_config.SOURCE_ROOT or vim.fn.getcwd(), -- Рабочая директория
           env = {
-            PYTHONPATH = project_config.SOURCE_ROOT or vim.fn.getcwd(),
+            PYTHONPATH = project_config.SOURCE_ROOT or vim.fn.getcwd(),  -- Указываем путь для поиска модулей
           },
         },
       }
