@@ -2,7 +2,7 @@ return {
   "goolord/alpha-nvim",
   dependencies = { "nvim-tree/nvim-web-devicons" },
   config = function()
-    local dashboard_theme = require("alpha.themes.dashboard")
+    local dashboard_theme = require "alpha.themes.dashboard"
 
     -- Header Section
     local logo = [[
@@ -45,9 +45,13 @@ return {
     dashboard_theme.section.buttons.val = {
       dashboard_theme.button("<leader> ff", " Find file", "<cmd>Telescope find_files <CR>"),
       dashboard_theme.button("<leader> fw", " Find text", "<cmd>Telescope live_grep <CR>"),
-      dashboard_theme.button("<leader> fp", " Find Project", "<cmd>Telescope project <CR>"),
+      dashboard_theme.button("<leader> fp", " Find Project", "<cmd>Telescope projects <CR>"),
       dashboard_theme.button("<leader> fo", " Recent files", "<cmd>Telescope oldfiles <CR>"),
-      dashboard_theme.button("<leader> ql", " Load Last Session", "<cmd>lua require('persistence').load({ last = true }) <CR>"),
+      dashboard_theme.button(
+        "<leader> ql",
+        " Load Last Session",
+        "<cmd>lua require('persistence').load({ last = true }) <CR>"
+      ),
       dashboard_theme.button("n", " New file", "<cmd>ene <BAR> startinsert <CR>"),
       dashboard_theme.button("<leader> qq", " Close", "<cmd>q <CR>"),
     }
@@ -57,9 +61,7 @@ return {
       vim.api.nvim_create_autocmd("User", {
         once = true,
         pattern = "AlphaReady",
-        callback = function()
-          require("lazy").show()
-        end,
+        callback = function() require("lazy").show() end,
       })
     end
 
@@ -71,7 +73,7 @@ return {
       { type = "padding", val = 1 }, -- Space between buttons and recent files
       dashboard_theme.section.footer,
     }
-    
+
     require("alpha").setup(dashboard_theme.opts)
-  end
+  end,
 }
