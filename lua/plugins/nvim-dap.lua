@@ -7,10 +7,8 @@ local function load_env(file)
   local f = io.open(file, "r")
   if f then
     for line in f:lines() do
-      local key, value = line:match("([^=]+)=(.+)")
-      if key and value then
-        project_config[key] = value
-      end
+      local key, value = line:match "([^=]+)=(.+)"
+      if key and value then project_config[key] = value end
     end
     f:close()
   end
@@ -21,9 +19,9 @@ local function load_ini(file)
   local f = io.open(file, "r")
   if f then
     for line in f:lines() do
-      local key, value = line:match("([^=]+)=(.+)")
+      local key, value = line:match "([^=]+)=(.+)"
       if key and value then
-        project_config[key] = value:gsub('^%s*(.-)%s*$', '%1') -- Убираем лишние пробелы
+        project_config[key] = value:gsub("^%s*(.-)%s*$", "%1") -- Убираем лишние пробелы
       end
     end
     f:close()
@@ -41,11 +39,11 @@ return {
   {
     "mfussenegger/nvim-dap",
     config = function()
-      local dap = require("dap")
+      local dap = require "dap"
 
       dap.adapters.python = {
         type = "executable",
-        command = vim.fn.exepath("python"),
+        command = vim.fn.exepath "python",
         args = { "-m", "debugpy.adapter" },
       }
 
@@ -56,17 +54,53 @@ return {
           name = "Launch file",
           program = "${file}",
           pythonPath = function()
-            -- Используем абсолютный путь, если PYTHON_VENV не абсолютный
-            local python_path = project_config.PYTHON_VENV or vim.fn.exepath("python")
-            if not python_path:match("^/") then
-              python_path = vim.fn.expand(vim.fn.getcwd() .. "/" .. python_path)
-            end
+            local python_path = project_config.PYTHON_VENV or vim.fn.exepath "python"
+            if not python_path:match "^/" then python_path = vim.fn.expand(vim.fn.getcwd() .. "/" .. python_path) end
             return python_path
           end,
-          cwd = project_config.SOURCE_ROOT or vim.fn.getcwd(), -- Рабочая директория
+          cwd = project_config.SOURCE_ROOT or vim.fn.getcwd(),
           env = {
-            PYTHONPATH = project_config.SOURCE_ROOT or vim.fn.getcwd(),  -- Указываем путь для поиска модулей
+            PYTHONPATH = project_config.SOURCE_ROOT or vim.fn.getcwd(),
           },
+          justMyCode = false,
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "Django Runserver",
+          program = "${workspaceFolder}/manage.py",
+          args = { "runserver", "--noreload" },
+          pythonPath = function()
+            local python_path = project_config.PYTHON_VENV or vim.fn.exepath "python"
+            if not python_path:match "^/" then python_path = vim.fn.expand(vim.fn.getcwd() .. "/" .. python_path) end
+            return python_path
+          end,
+          cwd = project_config.SOURCE_ROOT or vim.fn.getcwd(),
+          env = {
+            PYTHONPATH = project_config.SOURCE_ROOT or vim.fn.getcwd(),
+          },
+          justMyCode = false,
+          django = true,
+        },
+        {
+          type = "python",
+          request = "launch",
+          name = "Launch file with arguments",
+          program = "${file}",
+          args = function()
+            local input = vim.fn.input "Arguments: "
+            return vim.fn.split(input, " ", true)
+          end,
+          pythonPath = function()
+            local python_path = project_config.PYTHON_VENV or vim.fn.exepath "python"
+            if not python_path:match "^/" then python_path = vim.fn.expand(vim.fn.getcwd() .. "/" .. python_path) end
+            return python_path
+          end,
+          cwd = project_config.SOURCE_ROOT or vim.fn.getcwd(),
+          env = {
+            PYTHONPATH = project_config.SOURCE_ROOT or vim.fn.getcwd(),
+          },
+          justMyCode = false,
         },
       }
     end,
